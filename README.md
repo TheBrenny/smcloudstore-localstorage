@@ -33,10 +33,43 @@ const storage = SMCloudStore.create('localstorage', options)
 
 ### Using pre-signed URLs
 
-In the method [`storage.presignedPutUrl(container, path, [options], [ttl])`](https://italypaleale.github.io/SMCloudStore/classes/generic_s3.generics3provider.html#presignedputurl), the Generic S3 provider ignores the `options` argument, which has no effect on the generated tokens.
+In the `storage.presignedPutUrl(container, path, [options], [ttl])` and equivalent `get` methods, the LocalStorage provider ignores the `container` and `options` argument, which have no effect.
 
-### Accessing the Minio library
+What is returned, however, is a promise that is resolved using your `signingFn` function which should return a string (being the final URL). The design intent is to allow you to generate and store a link in your database with a reference to the file to get/put. This gives you full control over how you manage these links.
 
-The Generic S3 provider is built on top of the [Minio JavaScript client](https://github.com/minio/minio-js), which is exposed by calling [`storage.client()`](https://italypaleale.github.io/SMCloudStore/classes/generic_s3.generics3provider.html#client).
+An example `signingFn` could be:
+```js
+// Signing function
+async function signingFn(method, path, ttl) {
+    let token;
+    let curUrl = await db.signedUrls.get(method, path);
+    if(curUrl !== null) {
+        token = curUrl.token;
+        await db.signedUrls.update(method, path, token, Date.now() + (ttl * 1000));
+    } else {
+        token = storage.client.generateRandomUid();
+        await db.signedUrls.put(method, path, token, Date.now() + (ttl * 1000));
+    }
+    return token;
+}
 
-You can use the object returned by this method to perform low-level operations using the Minio client.
+// Usage in express
+app.get('/download/:token', (req, res) => {
+    let token = req.params.token;
+    let url = await db.signedUrls.get(token);
+    if(url !== null && url.expire > Date.now()) {
+        if(url.method !== "get") return res.status(405).send("405 Method Not Allowed").end();
+        return (await storage.getObject(null, url.path)).pipe(res);
+    }
+    else return res.status(404).send("404 Not Found").end();
+});
+// .. and do something similar for put
+```
+
+### Accessing the LocalStorage library
+
+The LocalStorage provider is built from the ground up and has a couple of additional helper functions, which are exposed by calling `storage.client()`.
+
+By accessing this object, you have access to:
+- `generateRandomUid()`,
+- `sanitisePath(path)`

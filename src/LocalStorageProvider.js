@@ -26,7 +26,7 @@ class LocalStorageProvider extends StorageProvider {
         this._provider = 'localstorage';
         this._basePath = options.basePath || __dirname;
         this._signingFn = options.signingFn || (() => {});
-        //this._client = create something to read/write with
+        this._client = module.exports;
     }
 
     /**
@@ -214,10 +214,10 @@ function sanitisePath(path) {
     path.replace(/\.\./gi, "_..");
 }
 
-function generateRandUid() {
+function generateRandomUid() {
     return crypto.randomBytes(24).toString("base64").replace(/\//g, "-").replace(/\=/g, "_");
 }
 
 module.exports = LocalStorageProvider;
-module.exports.generateRandUid = generateRandUid;
+module.exports.generateRandomUid = generateRandomUid;
 module.exports.sanitisePath = sanitisePath;
