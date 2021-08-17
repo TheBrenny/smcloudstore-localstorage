@@ -1,25 +1,19 @@
-# @smcloudstore/generic-s3
+# smcloudstore-localstorage
 
-![](https://img.shields.io/npm/v/@smcloudstore/generic-s3.svg?style=flat) ![](https://img.shields.io/github/license/ItalyPaleAle/SMCloudStore.svg?style=flat)
-
-This package is a provider for [SMCloudStore](https://github.com/ItalyPaleAle/SMCloudStore), for a generic S3-compatible provider, including AWS S3. SMCloudStore is a lightweight Node.js module that offers a simple API to interact with the object storage services of multiple cloud providers.
+This package is a provider for [SMCloudStore](https://github.com/ItalyPaleAle/SMCloudStore), for local storage hosting. SMCloudStore is a lightweight Node.js module that offers a simple API to interact with the object storage services of multiple cloud providers.
 
 Please refer to the [main package](https://github.com/ItalyPaleAle/SMCloudStore) for the SMCloudStore documentation and instructions on how to use it.
 
 ## Provider-specific considerations
 
-There are a few provider-specific considerations for the GenericS3 provider.
+There are a few provider-specific considerations for the LocalStorage provider.
 
 ### Connection argument
 
-When initializing the GenericS3 provider, the `connection` argument is an object with:
+When initializing the LocalStorage provider, the `options` argument is an object with:
 
-- `connection.endPoint`: string representing the endpoint of the server to connect to; for AWS S3, set this to `s3.amazonaws.com` and the library will pick the correct endpoint based on the `connection.region` argument (default: 'us-east-1')
-- `connection.accessKey`: string containing the access key (the "public key")
-- `connection.secretKey`: string containing the secret key
-- `connection.useSSL` (optional): boolean that will force the connection using HTTPS if true (default: true)
-- `connection.port` (optional): number representing the port to connect to; defaults to 443 if `useSSL` is true, 80 otherwise
-- `connection.region` (optional): string containing the AWS region to use, useful for connecting to AWS S3
+- `options.signingFn`: `function(method, path, ttl)` returning a `String` (which can be promised) which returns a publically accessible URL to download/upload from/to the specified path. It should also only last for `ttl` seconds. (`generateRandUid()` is exposed to help generate random URL IDs.)
+- `options.basePath` (optional): string representing the base path to store files in(default: ``${__dirname}/storage``)
 
 Example:
 
@@ -27,15 +21,14 @@ Example:
 // Require the package
 const SMCloudStore = require('smcloudstore')
 
-// Complete with the connection options for GenericS3
-const connection = {
-    endPoint: 'storage.cloudprovider.com',
-    accessKey: 'PUBLIC_KEY_HERE',
-    secretKey: 'SECRET_KEY_HERE',
+// Complete with the connection options for LocalStorage
+const options = {
+    signingFn: (method, path, ttl) => console.log("store the method/path/ttl combo in a DB for later use with a generic route"),
+    basePath: __dirname + '/app/storage',
 }
 
 // Return an instance of the GenericS3Provider class
-const storage = SMCloudStore.create('generic-s3', connection)
+const storage = SMCloudStore.create('localstorage', options)
 ````
 
 ### Using pre-signed URLs
