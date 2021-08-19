@@ -103,7 +103,7 @@ class LocalStorageProvider extends StorageProvider {
     async putObject(container, path, data, options) {
         path = pathLib.join(this._basePath, sanitisePath(path));
 
-        if (data instanceof Stream || data instanceof Buffer || data instanceof String) {
+        if (data instanceof Stream || data instanceof Buffer || typeof data === "string") {
             return fs.promises.writeFile(path, data);
         } else {
             return Promise.reject(new Error('Data must be a stream, buffer or string'));
