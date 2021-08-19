@@ -183,7 +183,10 @@ class LocalStorageProvider extends StorageProvider {
     }
 
     /**
-     * Returns a URL that clients (e.g. browsers) can use to request an object from the server with a GET request, even if the object is private.
+     * Returns a URL that clients (e.g. browsers) can use to request an object from the server with a GET request,
+     * even if the object is private.
+     * 
+     * This does no checking to ensure that the object exists!
      * 
      * @param container - An unused variable, only here for compatibility
      * @param path - Path of the object, relative to the base path
@@ -197,7 +200,10 @@ class LocalStorageProvider extends StorageProvider {
     }
 
     /**
-     * Returns a URL that clients (e.g. browsers) can use for PUT operations on an object in the server, even if the object is private.
+     * Returns a URL that clients (e.g. browsers) can use for PUT operations on an object in the server, even if
+     * the object is private.
+     * 
+     * This does no checking to ensure that the object doesn't exist!
      * 
      * @param container - An unused variable, only here for compatibility
      * @param path - Path of the object, relative to the base path
