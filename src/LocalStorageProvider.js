@@ -102,7 +102,8 @@ class LocalStorageProvider extends StorageProvider {
      */
     async putObject(container, path, data, options) {
         path = pathLib.join(this._basePath, sanitisePath(path));
-
+        await mkdir(pathLib.dirname(path));
+        
         if (data instanceof Stream || data instanceof Buffer || typeof data === "string") {
             return fs.promises.writeFile(path, data);
         } else {
@@ -207,6 +208,19 @@ class LocalStorageProvider extends StorageProvider {
     presignedPutUrl(container, path, options, ttl) {
         ttl = !!ttl && ttl > 0 ? ttl : 86400;
         return Promise.resolve(this._signingFn("put", path, ttl));
+    }
+}
+
+function mkdir(path) {
+    if (typeof path === "string") {
+        return mkdir(path.split(path.sep));
+    } else {
+        // loops through all elements of the path array and makes sure that each folder exists down the array
+        let curPath = "";
+        for (let i = 0; i < path.length; i++) {
+            curPath = pathLib.join(curPath, path[i]);
+            if (!fs.existsSync(curPath)) fs.mkdirSync(curPath);
+        }
     }
 }
 
