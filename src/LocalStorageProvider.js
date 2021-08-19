@@ -211,7 +211,7 @@ class LocalStorageProvider extends StorageProvider {
 }
 
 function sanitisePath(path) {
-    path.replace(/\.\./gi, "_..");
+    return path.replace(/\.\./gi, "_..");
 }
 
 function generateRandomUid() {
