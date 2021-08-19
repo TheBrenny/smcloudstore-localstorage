@@ -103,7 +103,7 @@ class LocalStorageProvider extends StorageProvider {
     async putObject(container, path, data, options) {
         path = pathLib.join(this._basePath, sanitisePath(path));
         await mkdir(pathLib.dirname(path));
-        
+
         if (data instanceof Stream || data instanceof Buffer || typeof data === "string") {
             return fs.promises.writeFile(path, data);
         } else {
@@ -141,29 +141,30 @@ class LocalStorageProvider extends StorageProvider {
      */
     listObjects(container, path) {
         path = pathLib.join(this._basePath, sanitisePath(path));
-
-        if (fs.statSync(path).isDirectory()) {
-            let files = fs.readdirSync(path);
-            let items = [];
-            for (let file of files) {
-                let fullPath = pathLib.join(path, file);
-                let stats = fs.statSync(fullPath);
-                if (stats.isDirectory()) {
-                    items.push({
-                        prefix: file
-                    });
-                } else {
-                    items.push({
-                        path: file,
-                        size: stats.size,
-                        lastModified: stats.mtime,
-                        creationTime: stats.ctime,
-                    });
+        try {
+            if (fs.statSync(path).isDirectory()) {
+                let files = fs.readdirSync(path);
+                let items = [];
+                for (let file of files) {
+                    let fullPath = pathLib.join(path, file);
+                    let stats = fs.statSync(fullPath);
+                    if (stats.isDirectory()) {
+                        items.push({
+                            prefix: file
+                        });
+                    } else {
+                        items.push({
+                            path: file,
+                            size: stats.size,
+                            lastModified: stats.mtime,
+                            creationTime: stats.ctime,
+                        });
+                    }
                 }
-            }
-            return Promise.resolve(items);
-        } else {
-            return Promise.reject(new Error('Path must be a folder'));
+                return Promise.resolve(items);
+            } else throw new Error(`Path ${path} is not a directory`);
+        } catch (e) {
+            return Promise.reject(e);
         }
     }
 
