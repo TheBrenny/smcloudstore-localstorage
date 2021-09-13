@@ -220,7 +220,7 @@ class LocalStorageProvider extends StorageProvider {
 
 function mkdir(path) {
     if (typeof path === "string") {
-        return mkdir(path.split(path.sep));
+        return mkdir(path.split(pathLib.sep));
     } else {
         // loops through all elements of the path array and makes sure that each folder exists down the array
         let curPath = "";
