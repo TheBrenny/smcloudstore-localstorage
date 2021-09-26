@@ -219,16 +219,7 @@ class LocalStorageProvider extends StorageProvider {
 }
 
 function mkdir(path) {
-    if (typeof path === "string") {
-        return mkdir(path.split(pathLib.sep));
-    } else {
-        // loops through all elements of the path array and makes sure that each folder exists down the array
-        let curPath = "";
-        for (let i = 0; i < path.length; i++) {
-            curPath = pathLib.join(curPath, path[i]);
-            if (!fs.existsSync(curPath)) fs.mkdirSync(curPath);
-        }
-    }
+    return fs.promises.mkdir(path, { recursive: true });
 }
 
 function sanitisePath(path) {
